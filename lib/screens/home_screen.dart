@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'sidebar_screen.dart';
 import 'announcement_screen.dart';
+import 'calculate_screen.dart';
+import 'review_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,37 @@ class _HomeScreenState extends State<HomeScreen> {
       'desc': 'ดูรายละเอียด >',
     },
   ];
+
+  // ── navigation map ──────────────────────────────────────────
+  void _onMenuTap(String label) {
+    switch (label) {
+      case 'CALCULATE':
+        Navigator.pushNamed(context, '/calculate');
+        break;
+      case 'WRITE THE\nREVIEW':
+        Navigator.pushNamed(context, '/review');
+        break;
+      case 'PAYMENT\nLOCATION':
+        // TODO: สร้างหน้า payment location
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Coming soon: Payment Location')),
+        );
+        break;
+      case 'PAYMENT\nTRACKING':
+        // TODO: สร้างหน้า payment tracking
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Coming soon: Payment Tracking')),
+        );
+        break;
+      case 'ADD\nELECTRICAL':
+        // TODO: สร้างหน้า add electrical
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Coming soon: Add Electrical')),
+        );
+        break;
+    }
+  }
+  // ────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -83,47 +116,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.menu, color: Color(0xFF1A3A2E), size: 20),
+                child: const Icon(Icons.menu,
+                    color: Color(0xFF1A3A2E), size: 20),
               ),
             ),
           ),
-          Column(
-            children: [
-              const Text(
-                'HELLO, USER',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  color: Color(0xFF1A3A2E),
-                ),
-              ),
-            ],
+          const Text(
+            'HELLO, USER',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              color: Color(0xFF1A3A2E),
+            ),
           ),
           Row(
             children: [
               GestureDetector(
                 onTap: () {},
-                child: const Text(
-                  'ไทย',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4CAF87),
-                  ),
-                ),
+                child: const Text('ไทย',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF4CAF87))),
               ),
-              const Text(' | ', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              const Text(' | ',
+                  style: TextStyle(color: Colors.grey, fontSize: 12)),
               GestureDetector(
                 onTap: () {},
-                child: const Text(
-                  'ENG',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey,
-                  ),
-                ),
+                child: const Text('ENG',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey)),
               ),
             ],
           ),
@@ -159,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Stack(
               children: [
-                // Decorative circles
                 Positioned(
                   right: -20,
                   top: -20,
@@ -184,7 +208,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                // Bulb icons
                 Positioned(
                   right: 16,
                   top: 20,
@@ -207,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                // Text content
                 Padding(
                   padding: const EdgeInsets.all(22),
                   child: Column(
@@ -240,7 +262,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: Colors.white.withOpacity(0.4), width: 1),
+                              color: Colors.white.withOpacity(0.4),
+                              width: 1),
                         ),
                         child: Text(
                           banner['desc']!,
@@ -270,10 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: color.withOpacity(0.9),
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 10,
-          ),
+          BoxShadow(color: color.withOpacity(0.5), blurRadius: 10),
         ],
       ),
       child: const Icon(Icons.lightbulb, color: Colors.white, size: 18),
@@ -357,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMenuItem(IconData icon, String label) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => _onMenuTap(label), // ← แก้จาก () {} เป็น _onMenuTap
       child: Column(
         children: [
           Container(
@@ -409,21 +429,25 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(Icons.home_filled, 'HOME PAE', 0),
+          _buildNavItem(Icons.home_filled, 'HOME PAGE', 0),
           _buildNavItem(
             Icons.campaign_outlined,
             'ANNOUNCEMENT',
             1,
             onTap: () {
               setState(() => _bottomIndex = 1);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const AnnouncementScreen()),
-              );
+              Navigator.pushNamed(context, '/announcement');
             },
           ),
-          _buildNavItem(Icons.person_outline, 'ACCOUNT', 2),
+          _buildNavItem(
+            Icons.person_outline,
+            'ACCOUNT',
+            2,
+            onTap: () {
+              setState(() => _bottomIndex = 2);
+              Navigator.pushNamed(context, '/profile');   // ← เปลี่ยนจาก openDrawer
+            },
+          ),
         ],
       ),
     );
@@ -433,16 +457,14 @@ class _HomeScreenState extends State<HomeScreen> {
       {VoidCallback? onTap}) {
     final isActive = _bottomIndex == index;
     return GestureDetector(
-      onTap: onTap ??
-          () {
-            setState(() => _bottomIndex = index);
-          },
+      onTap: onTap ?? () => setState(() => _bottomIndex = index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
-            color: isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
+            color:
+                isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
             size: 24,
           ),
           const SizedBox(height: 4),
@@ -451,7 +473,9 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w600,
-              color: isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
+              color: isActive
+                  ? const Color(0xFF4CAF87)
+                  : Colors.grey.shade400,
               letterSpacing: 0.5,
             ),
           ),

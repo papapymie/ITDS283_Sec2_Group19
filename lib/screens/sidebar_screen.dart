@@ -21,9 +21,13 @@ class SidebarScreen extends StatelessWidget {
             children: [
               _buildHeader(context),
               const SizedBox(height: 8),
-              _buildMenuSection(),
-              const Divider(color: Color(0xFFB0DDC8), thickness: 1, indent: 24, endIndent: 24),
-              _buildSecondSection(),
+              _buildMenuSection(context),
+              const Divider(
+                  color: Color(0xFFB0DDC8),
+                  thickness: 1,
+                  indent: 24,
+                  endIndent: 24),
+              _buildSecondSection(context),
               const Spacer(),
               _buildLogout(context),
               const SizedBox(height: 24),
@@ -67,7 +71,10 @@ class SidebarScreen extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+             onTap: () {
+                Navigator.pop(context);                         // ปิด drawer ก่อน
+                Navigator.pushNamed(context, '/profile');       // ← เปิดหน้า profile
+              },
             child: Container(
               width: 36,
               height: 36,
@@ -75,7 +82,8 @@ class SidebarScreen extends StatelessWidget {
                 color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close, color: Color(0xFF1A3A2E), size: 18),
+              child:
+                  const Icon(Icons.close, color: Color(0xFF1A3A2E), size: 18),
             ),
           ),
         ],
@@ -83,43 +91,57 @@ class SidebarScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuSection() {
+  Widget _buildMenuSection(BuildContext context) {
     final items = [
-      {'icon': Icons.calculate_outlined, 'label': 'CALCULATE'},
-      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION'},
-      {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING'},
+      {'icon': Icons.calculate_outlined, 'label': 'CALCULATE', 'route': '/calculate'},
+      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': ''},
+      {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': ''},
     ];
     return Column(
       children: items
           .map((item) => _buildSidebarItem(
+                context,
                 item['icon'] as IconData,
                 item['label'] as String,
+                item['route'] as String,
               ))
           .toList(),
     );
   }
 
-  Widget _buildSecondSection() {
+  Widget _buildSecondSection(BuildContext context) {
     final items = [
-      {'icon': Icons.rate_review_outlined, 'label': 'WRITE THE REVIEW'},
-      {'icon': Icons.add_home_outlined, 'label': 'ADD ELECTRICAL'},
-      {'icon': Icons.campaign_outlined, 'label': 'ANNOUNCEMENT'},
+      {'icon': Icons.rate_review_outlined, 'label': 'WRITE THE REVIEW', 'route': '/review'},
+      {'icon': Icons.add_home_outlined, 'label': 'ADD ELECTRICAL', 'route': ''},
+      {'icon': Icons.campaign_outlined, 'label': 'ANNOUNCEMENT', 'route': '/announcement'},
     ];
     return Column(
       children: items
           .map((item) => _buildSidebarItem(
+                context,
                 item['icon'] as IconData,
                 item['label'] as String,
+                item['route'] as String,
               ))
           .toList(),
     );
   }
 
-  Widget _buildSidebarItem(IconData icon, String label) {
+  Widget _buildSidebarItem(
+      BuildContext context, IconData icon, String label, String route) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.pop(context); // ปิด drawer ก่อน
+          if (route.isNotEmpty) {
+            Navigator.pushNamed(context, route);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Coming soon: $label')),
+            );
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -170,7 +192,8 @@ class SidebarScreen extends StatelessWidget {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.logout, color: Colors.red.shade400, size: 20),
+                child:
+                    Icon(Icons.logout, color: Colors.red.shade400, size: 20),
               ),
               const SizedBox(width: 14),
               Text(

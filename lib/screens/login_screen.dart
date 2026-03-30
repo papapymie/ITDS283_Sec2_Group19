@@ -113,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Bulb body
           Positioned(
             top: 22,
             child: Container(
@@ -125,7 +124,6 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
           ),
-          // Water drop inside bulb
           Positioned(
             top: 26,
             child: Container(
@@ -137,7 +135,6 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
           ),
-          // Bulb base
           Positioned(
             bottom: 18,
             child: Container(
@@ -172,11 +169,13 @@ class _LoginScreenState extends State<LoginScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Username field
+          // เลขบัตรประชาชน
           _buildTextField(
             controller: _usernameController,
-            hint: 'ชื่อผู้ใช้งาน',
-            icon: Icons.person_outline,
+            hint: 'เลขบัตรประชาชน 13 หลัก',
+            icon: Icons.badge_outlined,
+            keyboardType: TextInputType.number,
+            maxLength: 13,
           ),
           const SizedBox(height: 16),
 
@@ -239,6 +238,8 @@ class _LoginScreenState extends State<LoginScreen>
     required IconData icon,
     bool obscure = false,
     Widget? suffixIcon,
+    TextInputType? keyboardType,
+    int? maxLength,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -248,6 +249,8 @@ class _LoginScreenState extends State<LoginScreen>
       child: TextField(
         controller: controller,
         obscureText: obscure,
+        keyboardType: keyboardType,
+        maxLength: maxLength,
         style: const TextStyle(
           fontSize: 14,
           color: Color(0xFF1A3A2E),
@@ -258,6 +261,7 @@ class _LoginScreenState extends State<LoginScreen>
           prefixIcon: Icon(icon, color: const Color(0xFF4CAF87), size: 20),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
+          counterText: '',
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),

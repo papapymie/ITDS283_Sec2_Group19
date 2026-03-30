@@ -3,6 +3,9 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/announcement_screen.dart';
 import 'screens/sidebar_screen.dart';
+import 'screens/review_screen.dart';       
+import 'screens/calculate_screen.dart';    
+import 'screens/profile_screen.dart'; 
 
 void main() {
   runApp(const ElectricHomeApp());
@@ -26,9 +29,12 @@ class ElectricHomeApp extends StatelessWidget {
       ),
       initialRoute: '/login',
       routes: {
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/announcement': (context) => const AnnouncementScreen(),
+        '/login':       (context) => const LoginScreen(),
+        '/home':        (context) => const HomeScreen(),
+        '/announcement':(context) => const AnnouncementScreen(),
+        '/review':      (context) => const ReviewScreen(),    
+        '/calculate':   (context) => const CalculateScreen(),   
+        '/profile':     (context) => const ProfileScreen(),
       },
     );
   }

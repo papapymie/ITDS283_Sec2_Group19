@@ -193,7 +193,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               child: Container(
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4CAF87),
+                                  color: const Color.fromARGB(255, 67, 188, 140),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: Colors.white, width: 1.5),
                                 ),

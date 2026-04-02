@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,12 +10,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _idController = TextEditingController();
+  final _phoneController = TextEditingController();
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -36,9 +38,57 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void dispose() {
     _animController.dispose();
-    _usernameController.dispose();
-    _passwordController.dispose();
+    _idController.dispose();
+    _phoneController.dispose();
     super.dispose();
+  }
+
+  // แปลงเลขบัตร + เบอร์โทร เป็น email + password สำหรับ Firebase
+  String get _fakeEmail => '${_idController.text.trim()}@electric.app';
+  String get _password => _phoneController.text.trim();
+
+  Future<void> _login() async {
+  if (_idController.text.trim().length != 13 || _password.isEmpty) {
+    _showError('กรุณากรอกเลขบัตรประชาชน 13 หลัก และเบอร์โทรศัพท์');
+    return;
+  }
+
+  setState(() => _isLoading = true);
+
+  try {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _fakeEmail,
+      password: _password,
+    );
+    if (mounted) Navigator.pushReplacementNamed(context, '/home');
+  } on FirebaseAuthException catch (e) {
+    print('error code: ${e.code}');
+    if (e.code == 'user-not-found' || 
+        e.code == 'invalid-credential' ||
+        e.code == 'INVALID_LOGIN_CREDENTIALS') {
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _fakeEmail,
+          password: _password,
+        );
+        if (mounted) Navigator.pushReplacementNamed(context, '/home');
+      } on FirebaseAuthException catch (e2) {
+        _showError('สมัครไม่สำเร็จ: หมายเลขบัตรประชาชนนี้ถูกใช้งานแล้ว');
+      }
+    } else if (e.code == 'wrong-password') {
+      _showError('เบอร์โทรศัพท์ไม่ถูกต้อง');
+    } else {
+      _showError('เกิดข้อผิดพลาด: ${e.code}');
+    }
+  } finally {
+    if (mounted) setState(() => _isLoading = false);
+  }
+}
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.red.shade400),
+    );
   }
 
   @override
@@ -68,11 +118,8 @@ class _LoginScreenState extends State<LoginScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
                   _buildLogo(),
                   const SizedBox(height: 14),
-
-                  // App name
                   const Text(
                     'ELECTRIC HOME',
                     style: TextStyle(
@@ -83,8 +130,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ),
                   const SizedBox(height: 40),
-
-                  // Login card
                   _buildLoginCard(context),
                 ],
               ),
@@ -96,58 +141,10 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildLogo() {
-    return Container(
+    return Image.asset(
+      'assets/images/logoapp.png',
       width: 110,
       height: 110,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFDD835),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            top: 22,
-            child: Container(
-              width: 52,
-              height: 52,
-              decoration: const BoxDecoration(
-                color: Color(0xFF1A3A2E),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 26,
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4DD0E1),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 18,
-            child: Container(
-              width: 30,
-              height: 14,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A3A2E),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -169,19 +166,16 @@ class _LoginScreenState extends State<LoginScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // เลขบัตรประชาชน
           _buildTextField(
-            controller: _usernameController,
+            controller: _idController,
             hint: 'เลขบัตรประชาชน 13 หลัก',
             icon: Icons.badge_outlined,
             keyboardType: TextInputType.number,
             maxLength: 13,
           ),
           const SizedBox(height: 16),
-
-          // Password field
           _buildTextField(
-            controller: _passwordController,
+            controller: _phoneController,
             hint: 'หมายเลขโทรศัพท์',
             icon: Icons.lock_outline,
             obscure: _obscurePassword,
@@ -196,10 +190,8 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
           const SizedBox(height: 28),
-
-          // Login button
           GestureDetector(
-            onTap: () => Navigator.pushReplacementNamed(context, '/home'),
+            onTap: _isLoading ? null : _login,
             child: Container(
               height: 52,
               decoration: BoxDecoration(
@@ -216,15 +208,17 @@ class _LoginScreenState extends State<LoginScreen>
                 ],
               ),
               alignment: Alignment.center,
-              child: const Text(
-                'เข้าสู่ระบบ',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
-                ),
-              ),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'เข้าสู่ระบบ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -251,10 +245,7 @@ class _LoginScreenState extends State<LoginScreen>
         obscureText: obscure,
         keyboardType: keyboardType,
         maxLength: maxLength,
-        style: const TextStyle(
-          fontSize: 14,
-          color: Color(0xFF1A3A2E),
-        ),
+        style: const TextStyle(fontSize: 14, color: Color(0xFF1A3A2E)),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "193142558349",
+    "project_id": "electric-home-7e630",
+    "storage_bucket": "electric-home-7e630.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193142558349:android:8e88ce6204e48906875cc4",
+        "android_client_info": {
+          "package_name": "com.example.electric_home"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzr9V-XcaTglUVCQDBq-yDAgiunUDXTBU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

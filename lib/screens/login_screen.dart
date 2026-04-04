@@ -43,47 +43,46 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // แปลงเลขบัตร + เบอร์โทร เป็น email + password สำหรับ Firebase
   String get _fakeEmail => '${_idController.text.trim()}@electric.app';
   String get _password => _phoneController.text.trim();
 
   Future<void> _login() async {
-  if (_idController.text.trim().length != 13 || _password.isEmpty) {
-    _showError('กรุณากรอกเลขบัตรประชาชน 13 หลัก และเบอร์โทรศัพท์');
-    return;
-  }
-
-  setState(() => _isLoading = true);
-
-  try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _fakeEmail,
-      password: _password,
-    );
-    if (mounted) Navigator.pushReplacementNamed(context, '/home');
-  } on FirebaseAuthException catch (e) {
-    print('error code: ${e.code}');
-    if (e.code == 'user-not-found' || 
-        e.code == 'invalid-credential' ||
-        e.code == 'INVALID_LOGIN_CREDENTIALS') {
-      try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _fakeEmail,
-          password: _password,
-        );
-        if (mounted) Navigator.pushReplacementNamed(context, '/home');
-      } on FirebaseAuthException catch (e2) {
-        _showError('สมัครไม่สำเร็จ: หมายเลขบัตรประชาชนนี้ถูกใช้งานแล้ว');
-      }
-    } else if (e.code == 'wrong-password') {
-      _showError('เบอร์โทรศัพท์ไม่ถูกต้อง');
-    } else {
-      _showError('เกิดข้อผิดพลาด: ${e.code}');
+    if (_idController.text.trim().length != 13 || _password.isEmpty) {
+      _showError('กรุณากรอกเลขบัตรประชาชน 13 หลัก และเบอร์โทรศัพท์');
+      return;
     }
-  } finally {
-    if (mounted) setState(() => _isLoading = false);
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _fakeEmail,
+        password: _password,
+      );
+      if (mounted) Navigator.pushReplacementNamed(context, '/loading'); // ← เปลี่ยน
+    } on FirebaseAuthException catch (e) {
+      print('error code: ${e.code}');
+      if (e.code == 'user-not-found' ||
+          e.code == 'invalid-credential' ||
+          e.code == 'INVALID_LOGIN_CREDENTIALS') {
+        try {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _fakeEmail,
+            password: _password,
+          );
+          if (mounted) Navigator.pushReplacementNamed(context, '/loading'); // ← เปลี่ยน
+        } on FirebaseAuthException catch (e2) {
+          _showError('สมัครไม่สำเร็จ: หมายเลขบัตรประชาชนนี้ถูกใช้งานแล้ว');
+        }
+      } else if (e.code == 'wrong-password') {
+        _showError('เบอร์โทรศัพท์ไม่ถูกต้อง');
+      } else {
+        _showError('เกิดข้อผิดพลาด: ${e.code}');
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
-}
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(

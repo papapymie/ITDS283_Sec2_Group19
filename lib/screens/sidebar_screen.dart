@@ -94,7 +94,7 @@ class SidebarScreen extends StatelessWidget {
   Widget _buildMenuSection(BuildContext context) {
     final items = [
       {'icon': Icons.calculate_outlined, 'label': 'CALCULATE', 'route': '/calculate'},
-      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': ''},
+      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': '/location'},
       {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': ''},
     ];
     return Column(
@@ -112,7 +112,7 @@ class SidebarScreen extends StatelessWidget {
   Widget _buildSecondSection(BuildContext context) {
     final items = [
       {'icon': Icons.rate_review_outlined, 'label': 'WRITE THE REVIEW', 'route': '/review'},
-      {'icon': Icons.add_home_outlined, 'label': 'ADD ELECTRICAL', 'route': ''},
+      {'icon': Icons.add_home_outlined, 'label': 'ADD ELECTRICAL', 'route': '/add_electrical_water'},
       {'icon': Icons.campaign_outlined, 'label': 'ANNOUNCEMENT', 'route': '/announcement'},
     ];
     return Column(

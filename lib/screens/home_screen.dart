@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'PAYMENT\nLOCATION':
         // TODO: สร้างหน้า payment location
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coming soon: Payment Location')),
+          const SnackBar(content: Text('/location')),
         );
         break;
       case 'PAYMENT\nTRACKING':
@@ -56,9 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 'ADD\nELECTRICAL':
         // TODO: สร้างหน้า add electrical
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coming soon: Add Electrical')),
-        );
+        Navigator.pushNamed(context, '/add_electrical_water');
         break;
     }
   }
@@ -377,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMenuItem(IconData icon, String label) {
     return GestureDetector(
-      onTap: () => _onMenuTap(label), // ← แก้จาก () {} เป็น _onMenuTap
+      onTap: () => _onMenuTap(label), 
       child: Column(
         children: [
           Container(
@@ -445,7 +443,16 @@ class _HomeScreenState extends State<HomeScreen> {
             2,
             onTap: () {
               setState(() => _bottomIndex = 2);
-              Navigator.pushNamed(context, '/profile');   // ← เปลี่ยนจาก openDrawer
+              Navigator.pushNamed(context, '/profile');   
+            },
+          ),
+          _buildNavItem(
+            Icons.add_home_outlined,
+            'ADD ELECTRICAL',
+            3,
+            onTap: () {
+              setState(() => _bottomIndex = 3);
+              Navigator.pushNamed(context, '/add_electrical_water');   
             },
           ),
         ],

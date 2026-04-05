@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CalculateScreen extends StatefulWidget {
   const CalculateScreen({super.key});
@@ -18,23 +20,40 @@ class _CalculateScreenState extends State<CalculateScreen> {
   static const double electricityRate = 3.88;
   static const double waterRate = 27.83;
 
-  void _calculate() {
-    final elec = double.tryParse(_electricityController.text.trim());
-    final water = double.tryParse(_waterController.text.trim());
+  Future<void> _calculate() async {
+  final elec = double.tryParse(_electricityController.text.trim());
+  final water = double.tryParse(_waterController.text.trim());
 
-    if (elec == null || water == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกตัวเลขให้ครบทั้งสองช่อง')),
-      );
-      return;
-    }
+  if (elec == null || water == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('กรุณากรอกตัวเลขให้ครบทั้งสองช่อง')),
+    );
+    return;
+  }
 
-    setState(() {
-      _electricityCost = elec * electricityRate;
-      _waterCost = water * waterRate;
-      _totalBill = _electricityCost! + _waterCost!;
+  final elecCost = elec * electricityRate;
+  final waterCost = water * waterRate;
+  final total = elecCost + waterCost;
+
+  setState(() {
+    _electricityCost = elecCost;
+    _waterCost = waterCost;
+    _totalBill = total;
+  });
+
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    await FirebaseFirestore.instance.collection('electricity_usage').add({
+      'user_id': user.uid,
+      'electricity_units': elec,
+      'water_units': water,
+      'electricity_cost': elecCost,
+      'water_cost': waterCost,
+      'total': total,
+      'recorded_at': FieldValue.serverTimestamp(),
     });
   }
+}
 
   @override
   void dispose() {

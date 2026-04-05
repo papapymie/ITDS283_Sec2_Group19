@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'sidebar_screen.dart';
 import 'announcement_screen.dart';
 import 'calculate_screen.dart';
@@ -14,12 +16,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentBanner = 0;
   int _bottomIndex = 0;
+  String _userName = 'USER';
 
   final List<Map<String, String>> _banners = [
     {
       'title': 'Welcome!\nto Electric Home',
       'subtitle': '⚡ Stay watts-aware,\nsave more...',
-      'desc': 'ดูแลการใช้ไฟฟ้าที่บ้าน >',
+      'desc': 'ดูแลการใช้ไฟฟ้าที่บ้าน',
     },
     {
       'title': 'ประหยัดพลังงาน\nเพื่ออนาคต',
@@ -33,7 +36,28 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   ];
 
-  // ── navigation map ──────────────────────────────────────────
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get(const GetOptions(source: Source.serverAndCache));
+
+    if (doc.exists && mounted) {
+      setState(() {
+        _userName = doc.data()?['name'] ?? 'USER';
+      });
+    }
+  }
+
   void _onMenuTap(String label) {
     switch (label) {
       case 'CALCULATE':
@@ -43,51 +67,48 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushNamed(context, '/review');
         break;
       case 'PAYMENT\nLOCATION':
-        // TODO: สร้างหน้า payment location
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('/location')),
         );
         break;
       case 'PAYMENT\nTRACKING':
-        // TODO: สร้างหน้า payment tracking
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Coming soon: Payment Tracking')),
         );
         break;
       case 'ADD\nELECTRICAL':
-        // TODO: สร้างหน้า add electrical
         Navigator.pushNamed(context, '/add_electrical_water');
         break;
     }
   }
-  // ────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0FAF5),
       drawer: const SidebarScreen(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildBannerCarousel(),
-                    const SizedBox(height: 8),
-                    _buildBannerDots(),
-                    const SizedBox(height: 28),
-                    _buildMenuGrid(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+      body: Column(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: _buildTopBar(),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildBannerCarousel(),
+                  const SizedBox(height: 8),
+                  _buildBannerDots(),
+                  const SizedBox(height: 28),
+                  _buildMenuGrid(),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-            _buildBottomNav(),
-          ],
-        ),
+          ),
+          _buildBottomNav(),
+        ],
       ),
     );
   }
@@ -114,42 +135,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.menu,
-                    color: Color(0xFF1A3A2E), size: 20),
+                child: const Icon(Icons.menu, color: Color(0xFF1A3A2E), size: 20),
               ),
             ),
           ),
-          const Text(
-            'HELLO, USER',
-            style: TextStyle(
+          Text(
+            'HELLO, ${_userName.toUpperCase()}',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
               color: Color(0xFF1A3A2E),
             ),
           ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () {},
-                child: const Text('ไทย',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF4CAF87))),
-              ),
-              const Text(' | ',
-                  style: TextStyle(color: Colors.grey, fontSize: 12)),
-              GestureDetector(
-                onTap: () {},
-                child: const Text('ENG',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey)),
-              ),
-            ],
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -254,14 +253,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
-                              width: 1),
+                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
                         ),
                         child: Text(
                           banner['desc']!,
@@ -290,9 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: color.withOpacity(0.9),
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(color: color.withOpacity(0.5), blurRadius: 10),
-        ],
+        boxShadow: [BoxShadow(color: color.withOpacity(0.5), blurRadius: 10)],
       ),
       child: const Icon(Icons.lightbulb, color: Colors.white, size: 18),
     );
@@ -321,9 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: _currentBanner == i ? 20 : 7,
           height: 7,
           decoration: BoxDecoration(
-            color: _currentBanner == i
-                ? const Color(0xFF4CAF87)
-                : Colors.grey.shade300,
+            color: _currentBanner == i ? const Color(0xFF4CAF87) : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -346,25 +338,19 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: menuItems
-                .take(3)
-                .map((item) => _buildMenuItem(
-                      item['icon'] as IconData,
-                      item['label'] as String,
-                    ))
-                .toList(),
+            children: menuItems.take(3).map((item) => _buildMenuItem(
+              item['icon'] as IconData,
+              item['label'] as String,
+            )).toList(),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ...menuItems
-                  .skip(3)
-                  .map((item) => _buildMenuItem(
-                        item['icon'] as IconData,
-                        item['label'] as String,
-                      ))
-                  .toList(),
+              ...menuItems.skip(3).map((item) => _buildMenuItem(
+                item['icon'] as IconData,
+                item['label'] as String,
+              )).toList(),
               const SizedBox(width: 80),
             ],
           ),
@@ -375,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMenuItem(IconData icon, String label) {
     return GestureDetector(
-      onTap: () => _onMenuTap(label), 
+      onTap: () => _onMenuTap(label),
       child: Column(
         children: [
           Container(
@@ -413,7 +399,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNav() {
     return Container(
-      height: 68,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -424,38 +409,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildNavItem(Icons.home_filled, 'HOME PAGE', 0),
-          _buildNavItem(
-            Icons.campaign_outlined,
-            'ANNOUNCEMENT',
-            1,
-            onTap: () {
-              setState(() => _bottomIndex = 1);
-              Navigator.pushNamed(context, '/announcement');
-            },
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 68,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNavItem(Icons.home_filled, 'HOME PAGE', 0,
+                onTap: () => setState(() => _bottomIndex = 0),
+              ),
+              _buildNavItem(Icons.campaign_outlined, 'ANNOUNCEMENT', 1,
+                onTap: () async {
+                  setState(() => _bottomIndex = 1);
+                  await Navigator.pushNamed(context, '/announcement');
+                  setState(() => _bottomIndex = 0);
+                },
+              ),
+              _buildNavItem(Icons.person_outline, 'ACCOUNT', 2,
+                onTap: () async {
+                  setState(() => _bottomIndex = 2);
+                  await Navigator.pushNamed(context, '/profile');
+                  setState(() {
+                    _bottomIndex = 0;
+                    _loadUserName();
+                  });
+                },
+              ),
+              _buildNavItem(Icons.add_home_outlined, 'ADD ELECTRICAL', 3,
+                onTap: () async {
+                  setState(() => _bottomIndex = 3);
+                  await Navigator.pushNamed(context, '/add_electrical_water');
+                  setState(() => _bottomIndex = 0);
+                },
+              ),
+            ],
           ),
-          _buildNavItem(
-            Icons.person_outline,
-            'ACCOUNT',
-            2,
-            onTap: () {
-              setState(() => _bottomIndex = 2);
-              Navigator.pushNamed(context, '/profile');   
-            },
-          ),
-          _buildNavItem(
-            Icons.add_home_outlined,
-            'ADD ELECTRICAL',
-            3,
-            onTap: () {
-              setState(() => _bottomIndex = 3);
-              Navigator.pushNamed(context, '/add_electrical_water');   
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -464,14 +454,13 @@ class _HomeScreenState extends State<HomeScreen> {
       {VoidCallback? onTap}) {
     final isActive = _bottomIndex == index;
     return GestureDetector(
-      onTap: onTap ?? () => setState(() => _bottomIndex = index),
+      onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
-            color:
-                isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
+            color: isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
             size: 24,
           ),
           const SizedBox(height: 4),
@@ -480,9 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w600,
-              color: isActive
-                  ? const Color(0xFF4CAF87)
-                  : Colors.grey.shade400,
+              color: isActive ? const Color(0xFF4CAF87) : Colors.grey.shade400,
               letterSpacing: 0.5,
             ),
           ),

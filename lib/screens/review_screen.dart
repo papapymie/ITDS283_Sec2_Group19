@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({super.key});
@@ -10,40 +12,33 @@ class ReviewScreen extends StatefulWidget {
 class _ReviewScreenState extends State<ReviewScreen> {
   final _reviewController = TextEditingController();
   int _selectedStars = 0;
+  bool _submitting = false;
 
-  final List<Map<String, dynamic>> _reviews = [
-    {
-      'name': 'AMI',
-      'stars': 4,
-      'text': 'Electric Home is the best application ever!',
-    },
-    {
-      'name': 'BAIYOK',
-      'stars': 4,
-      'text': 'This app makes it easy to manage electricity usage at home.',
-    },
-    {
-      'name': 'NEW',
-      'stars': 5,
-      'text': 'Five stars for this application.',
-    },
-  ];
-
-  void _submitReview() {
+  Future<void> _submitReview() async {
     if (_reviewController.text.trim().isEmpty || _selectedStars == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('กรุณาใส่รีวิวและเลือกดาวด้วยนะ')),
       );
       return;
     }
+
+    setState(() => _submitting = true);
+
+    final user = FirebaseAuth.instance.currentUser;
+    final name = user?.displayName ?? user?.email?.split('@')[0] ?? 'Anonymous';
+
+    await FirebaseFirestore.instance.collection('reviews').add({
+      'user_id': user?.uid ?? '',
+      'name': name,
+      'stars': _selectedStars,
+      'text': _reviewController.text.trim(),
+      'created_at': FieldValue.serverTimestamp(),
+    });
+
+    _reviewController.clear();
     setState(() {
-      _reviews.insert(0, {
-        'name': 'YOU',
-        'stars': _selectedStars,
-        'text': _reviewController.text.trim(),
-      });
-      _reviewController.clear();
       _selectedStars = 0;
+      _submitting = false;
     });
   }
 
@@ -89,7 +84,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
               ),
               child: Column(
                 children: [
-                  // Avatar
                   Container(
                     width: 64,
                     height: 64,
@@ -110,8 +104,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Text input
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -130,8 +122,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Star rating
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (i) {
@@ -146,12 +136,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     }),
                   ),
                   const SizedBox(height: 14),
-
-                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _submitReview,
+                      onPressed: _submitting ? null : _submitReview,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3A9E82),
                         foregroundColor: Colors.white,
@@ -160,13 +148,22 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text(
-                        'SUBMIT',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
+                      child: _submitting
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'SUBMIT',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -186,8 +183,29 @@ class _ReviewScreenState extends State<ReviewScreen> {
             ),
             const SizedBox(height: 14),
 
-            // Review list
-            ..._reviews.map((r) => _buildReviewCard(r)),
+            // ดึง reviews จาก Firestore realtime
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('reviews')
+                  .orderBy('created_at', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('ยังไม่มีรีวิว', style: TextStyle(color: Colors.grey)),
+                  );
+                }
+                return Column(
+                  children: snapshot.data!.docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return _buildReviewCard(data);
+                  }).toList(),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -229,7 +247,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 Row(
                   children: [
                     Text(
-                      review['name'],
+                      review['name'] ?? 'Anonymous',
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
@@ -240,7 +258,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     Row(
                       children: List.generate(5, (i) {
                         return Icon(
-                          i < review['stars'] ? Icons.star : Icons.star_border,
+                          i < (review['stars'] ?? 0) ? Icons.star : Icons.star_border,
                           color: const Color(0xFFFFC107),
                           size: 16,
                         );
@@ -250,11 +268,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  review['text'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  review['text'] ?? '',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
               ],
             ),

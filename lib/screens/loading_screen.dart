@@ -22,18 +22,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Future<void> _navigateAfterLoading() async {
-    await Future.delayed(const Duration(seconds: 3));
+  await Future.delayed(const Duration(seconds: 3));
+  if (!mounted) return;
 
-    if (!mounted) return;
+  await FirebaseAuth.instance.authStateChanges().first;
+  
+  if (!mounted) return;
 
-    final User? currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
+  final User? currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser != null) {
+    Navigator.pushReplacementNamed(context, '/home');
+  } else {
+    Navigator.pushReplacementNamed(context, '/login');
   }
+}
 
   @override
   Widget build(BuildContext context) {

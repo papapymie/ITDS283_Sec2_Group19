@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, String> profileData;
@@ -37,10 +39,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  void _save() {
-    final updated = _controllers.map((k, c) => MapEntry(k, c.text.trim()));
-    Navigator.pop(context, updated);
-  }
+  Future<void> _save() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final updated = _controllers.map((k, c) => MapEntry(k, c.text.trim()));
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .set(updated, SetOptions(merge: true));
+
+  if (mounted) Navigator.pop(context, updated);
+}
 
   void _cancel() => Navigator.pop(context);
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,18 +40,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // ใช้ snapshots() เพื่อดึงข้อมูล Real-time (ดึงจาก Cache ก่อนแล้วตามด้วย Server)
     _profileSubscription = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.exists && mounted) {
-        setState(() {
-          profileData = Map<String, String>.from(
-            snapshot.data()!.map((k, v) => MapEntry(k, v.toString())),
-          );
-          _loading = false;
-        });
-      } else {
+    .collection('users')
+    .doc(user.uid)
+    .snapshots()
+    .listen((snapshot) {
+  if (snapshot.exists && mounted) {
+    setState(() {
+      // ดึงข้อมูลออกมาเป็น Map ตรงๆ ไม่ต้องสั่ง .toString() ทั้งยิบย่อยแบบเดิม
+      final data = snapshot.data() as Map<String, dynamic>;
+      
+      // แปลงข้อมูลให้เป็น Map<String, String> อย่างปลอดภัย
+      profileData = data.map((k, v) => MapEntry(k, v?.toString() ?? ''));
+      
+      _loading = false;
+      
+    });
+  } else {
         if (mounted) setState(() => _loading = false);
       }
     }, onError: (error) {
@@ -112,17 +118,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const SizedBox(height: 16),
 
                             Center(
-                              child: Container(
-                                width: 90,
-                                height: 90,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 3),
+                                  child: Container(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 3),
+                                      image: (profileData['profile_image'] != null && profileData['profile_image']!.length > 50)
+                                          ? DecorationImage(
+                                              // แปลงจากรหัสตัวหนังสือกลับเป็นรูปภาพ
+                                              image: MemoryImage(base64Decode(profileData['profile_image']!)),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : null,
+                                    ),
+                                    child: (profileData['profile_image'] == null || profileData['profile_image']!.length <= 50)
+                                        ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                                        : null,
+                                  ),
                                 ),
-                                child: const Icon(Icons.person, size: 50, color: Colors.grey),
-                              ),
-                            ),
                             const SizedBox(height: 20),
 
                             _buildLabel('ชื่อ - นามสกุล'),

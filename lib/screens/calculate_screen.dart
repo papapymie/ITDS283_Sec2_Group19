@@ -21,15 +21,18 @@ class _CalculateScreenState extends State<CalculateScreen> {
   static const double waterRate = 27.83;
 
   Future<void> _calculate() async {
-  final elec = double.tryParse(_electricityController.text.trim());
-  final water = double.tryParse(_waterController.text.trim());
+    // เพิ่มบรรทัดนี้เพื่อปิดคีย์บอร์ดทันทีที่กดปุ่มคำนวณ
+    FocusScope.of(context).unfocus();
 
-  if (elec == null || water == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('กรุณากรอกตัวเลขให้ครบทั้งสองช่อง')),
-    );
-    return;
-  }
+    final elec = double.tryParse(_electricityController.text.trim());
+    final water = double.tryParse(_waterController.text.trim());
+
+    if (elec == null || water == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณากรอกตัวเลขให้ครบทั้งสองช่อง')),
+      );
+      return;
+    }
 
   final elecCost = elec * electricityRate;
   final waterCost = water * waterRate;
@@ -64,20 +67,31 @@ class _CalculateScreenState extends State<CalculateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0FAF4),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3A9E82),
-        foregroundColor: Colors.white,
-        title: const Text(
-          'Calculate & Energy',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF0FAF4),
+
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF3A9E82),
+          foregroundColor: Colors.white,
+          title: const Text(
+            'Calculate & Energy',
+            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1),
+          ),
+          centerTitle: true,
+          elevation: 0,
         ),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            // เพิ่ม padding ด้านล่างให้ขยับตามความสูงของคีย์บอร์ด
+            padding: EdgeInsets.only(
+              left: 20, 
+              right: 20, 
+              top: 20, 
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -308,8 +322,11 @@ class _CalculateScreenState extends State<CalculateScreen> {
           ],
         ),
       ),
-    );
+    )
+      )
+    ); 
   }
+
 
   Widget _buildInputCard({
     required TextEditingController controller,

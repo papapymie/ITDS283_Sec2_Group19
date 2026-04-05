@@ -51,9 +51,7 @@ class _TimerScreenState extends State<TimerScreen> {
   void _toggleTimer(int index) {
     if (_isRunning[index] == true) {
       _timers[index]?.cancel();
-      setState(() {
-        _isRunning[index] = false;
-      });
+      setState(() => _isRunning[index] = false);
     } else {
       _timers[index] = Timer.periodic(const Duration(seconds: 1), (_) {
         final current = _durations[index] ?? Duration.zero;
@@ -110,19 +108,24 @@ class _TimerScreenState extends State<TimerScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFBFE6F1),
       body: SafeArea(
-        bottom: false, // ปล่อยให้สีขาวลงไปจนสุดพื้นที่ด้านล่าง (Home Indicator)
+        bottom: false,
         child: Column(
           children: [
-            // Header bar
-            Container(
-              height: 38,
-              width: double.infinity,
-              color: const Color(0xFFCFEFC0),
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: InkWell(
-                onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_circle_left_outlined, size: 24),
+            // Header — ไม่มีกล่องสีแยก ยืดไปสุดจอ
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_circle_left_outlined, size: 28),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'USAGE TIMER',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                  ),
+                ],
               ),
             ),
 
@@ -135,18 +138,15 @@ class _TimerScreenState extends State<TimerScreen> {
                       child: IntrinsicHeight(
                         child: Column(
                           children: [
-                            const SizedBox(height: 20),
-                            // Title section
+                            const SizedBox(height: 8),
+                            // Subtitle
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 24),
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('USAGE TIMER', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-                                    Text('จับเวลาการใช้งานเครื่องใช้ไฟฟ้าและน้ำประปา', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                                  ],
+                                child: Text(
+                                  'จับเวลาการใช้งานเครื่องใช้ไฟฟ้าและน้ำประปา',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                                 ),
                               ),
                             ),
@@ -159,26 +159,39 @@ class _TimerScreenState extends State<TimerScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(30),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(appliance.icon, size: 86, color: const Color(0xFF1E4D7B)),
                                   const SizedBox(height: 12),
-                                  Text(appliance.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF1E4D7B))),
+                                  Text(
+                                    appliance.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF1E4D7B),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                             const SizedBox(height: 34),
 
-                            // แผ่นสีขาวด้านล่าง (ยืดสุดจอ)
+                            // แผ่นสีขาวด้านล่าง ยืดสุดจอ
                             Expanded(
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.fromLTRB(18, 40, 18, 40),
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFFF4F4F4), // หรือ Colors.white ตามดีไซน์
+                                  color: Color(0xFFF4F4F4),
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(48),
                                     topRight: Radius.circular(48),
@@ -215,11 +228,19 @@ class _TimerScreenState extends State<TimerScreen> {
                                             width: 115,
                                             height: 54,
                                             decoration: BoxDecoration(
-                                              color: isRunning ? const Color(0xFFE89A9A) : const Color(0xFFC8E7B8),
+                                              color: isRunning
+                                                  ? const Color(0xFFE89A9A)
+                                                  : const Color(0xFFC8E7B8),
                                               borderRadius: BorderRadius.circular(24),
                                             ),
                                             alignment: Alignment.center,
-                                            child: Text(isRunning ? 'STOP' : 'START', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+                                            child: Text(
+                                              isRunning ? 'STOP' : 'START',
+                                              style: const TextStyle(
+                                                fontSize: 21,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -229,7 +250,10 @@ class _TimerScreenState extends State<TimerScreen> {
                                     // Other Devices List
                                     const Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Text('เครื่องใช้อื่น ๆ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                                      child: Text(
+                                        'เครื่องใช้อื่น ๆ',
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
                                     _buildHorizontalList(devices),
@@ -293,7 +317,11 @@ class _TimerScreenState extends State<TimerScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(ap.icon, size: 32, color: ap.iconColor),
-                        Text(ap.name, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                        Text(
+                          ap.name,
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
@@ -310,7 +338,14 @@ class _TimerScreenState extends State<TimerScreen> {
   Widget _timeUnit(String value, String label) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Color(0xFF2F427F))),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 42,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF2F427F),
+          ),
+        ),
         Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
       ],
     );
@@ -319,7 +354,10 @@ class _TimerScreenState extends State<TimerScreen> {
   Widget _colon() {
     return const Padding(
       padding: EdgeInsets.only(left: 4, right: 4, bottom: 18),
-      child: Text(':', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Color(0xFF2F427F))),
+      child: Text(
+        ':',
+        style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Color(0xFF2F427F)),
+      ),
     );
   }
 }

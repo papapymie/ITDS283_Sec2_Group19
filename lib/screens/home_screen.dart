@@ -67,14 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushNamed(context, '/review');
         break;
       case 'PAYMENT\nLOCATION':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('/location')),
-        );
+        Navigator.pushNamed(context, '/location');
         break;
       case 'PAYMENT\nTRACKING':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Coming soon: Payment Tracking')),
-        );
+        Navigator.pushNamed(context, '/tracking');
         break;
       case 'ADD\nELECTRICAL':
         Navigator.pushNamed(context, '/add_electrical_water');

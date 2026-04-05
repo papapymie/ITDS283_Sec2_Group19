@@ -45,5 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>ต้องการตำแหน่งเพื่อหาสถานที่รับชำระเงินใกล้คุณ</string>
 </dict>
 </plist>

@@ -257,7 +257,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('เรียงตามระยะทาง',
-            style: TextStyle(fontWeight: FontWeight.w800)),
+            style: TextStyle(fontFamily: 'NotoSansThai', fontWeight: FontWeight.w800)),
         content: const Text('เลือกวิธีระบุตำแหน่งของคุณ'),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
@@ -271,7 +271,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
                     _useGPS();
                   },
                   icon: const Icon(Icons.my_location),
-                  label: const Text('📍 ตำแหน่ง GPS ปัจจุบัน'),
+                  label: const Text('ตำแหน่ง GPS ปัจจุบัน'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF87),
                     foregroundColor: Colors.white,
@@ -290,7 +290,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
                     _useProfileAddress();
                   },
                   icon: const Icon(Icons.home_outlined),
-                  label: const Text('🏠 ที่อยู่ใน Profile'),
+                  label: const Text('ที่อยู่ใน Profile'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF184A86),
                     foregroundColor: Colors.white,
@@ -376,6 +376,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
                       child: Text(
                         _locationStatusText,
                         style: TextStyle(
+                          fontFamily: 'NotoSansThai',
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: _locationMode == 'gps'
@@ -412,14 +413,18 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
                     if (favorites.isNotEmpty) ...[
                       const Text('รายการโปรด',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
+                            fontFamily: 'NotoSansThai',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800)),
                       const SizedBox(height: 10),
                       ...favorites.map(_buildLocationCard),
                       const SizedBox(height: 18),
                     ],
                     const Text('สถานที่รับชำระเงินอื่น ๆ',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w800)),
+                            fontFamily: 'NotoSansThai',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800)),
                     const SizedBox(height: 10),
                     ...others.map(_buildLocationCard),
                   ],
@@ -489,9 +494,10 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
         const Padding(
           padding: EdgeInsets.fromLTRB(18, 8, 18, 12),
           child: Text(
-            'สถานที่รับชำระเงิน',
+            'Payment Locations',
             style: TextStyle(
-              fontSize: 30,
+              fontFamily: 'Koulen',
+              fontSize: 25,
               fontWeight: FontWeight.w900,
               color: Colors.black,
             ),
@@ -580,7 +586,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
             onPressed: () => _openMapPage(location),
             icon: const Icon(Icons.location_on_outlined, size: 18),
             label: const Text('แผนที่',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                style: TextStyle(fontFamily: 'NotoSansThai', fontSize: 13, fontWeight: FontWeight.w700)),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD6F1FA),
               foregroundColor: Colors.black87,
@@ -645,7 +651,8 @@ class PaymentLocationMapPage extends StatelessWidget {
                   child: Text(
                     location.name,
                     style: const TextStyle(
-                      fontSize: 22,
+                      fontFamily: 'Koulen',
+                      fontSize: 26,
                       fontWeight: FontWeight.w900,
                       color: Colors.black,
                     ),
@@ -743,22 +750,22 @@ class PaymentLocationMapPage extends StatelessWidget {
                         children: [
                           Text(location.name,
                               style: const TextStyle(
+                                  fontFamily: 'NotoSansThai',
                                   fontSize: 17,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.black87)),
-                          const SizedBox(height: 6),
-                          Text(location.address,
+                          const SizedBox(height: 10),
+                          Text( location.address,
                               style: const TextStyle(
-                                  fontSize: 13,
-                                  height: 1.4,
-                                  color: Colors.black54)),
+                                  fontFamily: 'NotoSansThai', fontSize: 13, height: 1.4, color: Colors.black54)),
                           const SizedBox(height: 10),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () => _openInGoogleMaps(context),
                               icon: const Icon(Icons.map_outlined),
-                              label: const Text('เปิดใน Google Maps'),
+                              label: const Text('เปิดใน Google Maps'
+                                  , style: TextStyle(fontFamily: 'NotoSansThai', fontSize: 14, fontWeight: FontWeight.w700)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFFD6F1FA),
                                 foregroundColor: Colors.black87,

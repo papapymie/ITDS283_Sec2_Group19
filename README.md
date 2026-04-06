@@ -1,6 +1,9 @@
 # electric_home
 
-A new Flutter project.
+git push -u origin main
+git add .
+git commit -m "ใส่ข้อความอธิบายตรงนี้"
+git push
 
 ## Getting Started
 

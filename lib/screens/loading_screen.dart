@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // Import all screens
 import 'home_screen.dart';
 import 'login_screen.dart';
-import 'location_screen.dart';
+import 'payment_location_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});

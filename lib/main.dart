@@ -12,7 +12,7 @@ import 'screens/announcement_screen.dart';
 import 'screens/review_screen.dart';
 import 'screens/calculate_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/location_screen.dart';
+import 'screens/payment_location_screen.dart';
 import 'screens/add_electrical_water_screen.dart';
 import 'screens/loading_screen.dart';
 import 'screens/timer_screen.dart';
@@ -82,7 +82,7 @@ Widget build(BuildContext context) {
       '/review': (context) => const ReviewScreen(),
       '/calculate': (context) => const CalculateScreen(),
       '/profile': (context) => const ProfileScreen(),
-      '/location': (context) => const LocationScreen(),
+      '/payment_location': (context) => const PaymentLocationScreen(),
       '/add_electrical_water': (context) => const AddElectricalWaterScreen(),
       '/add_device': (context) => const AddDeviceScreen(),
       '/timer': (context) => const TimerScreen(),

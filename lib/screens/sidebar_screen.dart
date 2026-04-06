@@ -144,7 +144,7 @@ class _SidebarScreenState extends State<SidebarScreen> {
   Widget _buildMenuSection(BuildContext context) {
     final items = [
       {'icon': Icons.calculate_outlined, 'label': 'CALCULATE', 'route': '/calculate'},
-      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': '/location'},
+      {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': '/payment_location'},
       {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': '/tracking'},
       {'icon': Icons.timer_outlined, 'label': 'TIMER', 'route': '/timer'},
     ];

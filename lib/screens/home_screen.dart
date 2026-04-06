@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushNamed(context, '/review');
         break;
       case 'PAYMENT\nLOCATION':
-        Navigator.pushNamed(context, '/location');
+        Navigator.pushNamed(context, '/payment_location');
         break;
       case 'PAYMENT\nTRACKING':
         Navigator.pushNamed(context, '/tracking');

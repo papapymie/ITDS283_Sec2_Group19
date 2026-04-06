@@ -15,32 +15,69 @@ class _ReviewScreenState extends State<ReviewScreen> {
   bool _submitting = false;
 
   Future<void> _submitReview() async {
-    if (_reviewController.text.trim().isEmpty || _selectedStars == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณาใส่รีวิวและเลือกดาวด้วยนะ')),
-      );
-      return;
+  // 1. ตรวจสอบข้อมูลเบื้องต้น
+  if (_reviewController.text.trim().isEmpty || _selectedStars == 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('กรุณาใส่รีวิวและเลือกดาวด้วยนะ')),
+    );
+    return;
+  }
+
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('กรุณาเข้าสู่ระบบก่อนรีวิว')),
+    );
+    return;
+  }
+
+  FocusScope.of(context).unfocus();
+  setState(() => _submitting = true);
+
+  String finalName = 'Anonymous';
+  try {
+    // ดึงชื่อจาก Firestore users
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (userDoc.exists && userDoc.data()?['name'] != null) {
+      finalName = userDoc.data()!['name'];
+    } else {
+      // ถ้าไม่มีใน Firestore ให้ใช้จาก Auth Profile
+      finalName = user.displayName ?? user.email?.split('@')[0] ?? 'Anonymous';
     }
 
-    setState(() => _submitting = true);
-
-    final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName ?? user?.email?.split('@')[0] ?? 'Anonymous';
-
+    // บันทึกลงคอลเลกชัน reviews
     await FirebaseFirestore.instance.collection('reviews').add({
-      'user_id': user?.uid ?? '',
-      'name': name,
+      'user_id': user.uid,
+      'name': finalName,
       'stars': _selectedStars,
       'text': _reviewController.text.trim(),
       'created_at': FieldValue.serverTimestamp(),
     });
 
+    // สำเร็จแล้วล้างค่า
     _reviewController.clear();
     setState(() {
       _selectedStars = 0;
-      _submitting = false;
     });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ส่งรีวิวเรียบร้อยแล้ว ขอบคุณครับ!')),
+    );
+
+  } catch (e) {
+    print("Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
+    );
+  } finally {
+    // ไม่ว่าจะสำเร็จหรือพลาด ให้ปิดสถานะ Loading
+    if (mounted) setState(() => _submitting = false);
   }
+}
 
   @override
   void dispose() {
@@ -50,23 +87,26 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0FAF4),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF3A9E82),
-        foregroundColor: Colors.white,
-        title: const Text(
-          'User Reviews',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1),
+    // --- จุดที่ 3: ครอบ GestureDetector เพื่อให้แตะที่ว่างแล้วคีย์บอร์ดหุบ ---
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF0FAF4),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF3A9E82),
+          foregroundColor: Colors.white,
+          title: const Text(
+            'User Reviews',
+            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1),
+          ),
+          centerTitle: true,
+          elevation: 0,
         ),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Write a Review card
             Container(
               width: double.infinity,
@@ -209,6 +249,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
           ],
         ),
       ),
+      )
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 
 class SidebarScreen extends StatefulWidget {
   const SidebarScreen({super.key});
@@ -11,6 +12,7 @@ class SidebarScreen extends StatefulWidget {
 
 class _SidebarScreenState extends State<SidebarScreen> {
   String _userName = 'ข้อมูลส่วนตัว';
+  String? _profileImageBase64;
 
   @override
   void initState() {
@@ -22,25 +24,19 @@ class _SidebarScreenState extends State<SidebarScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get(const GetOptions(source: Source.cache));
+    // เปลี่ยนจาก .get() เป็น .snapshots().listen() เพื่อให้รูปอัปเดตทันที (Real-time)
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .listen((doc) {
       if (doc.exists && mounted) {
-        setState(() => _userName = doc.data()?['name'] ?? 'ข้อมูลส่วนตัว');
+        setState(() {
+          _userName = doc.data()?['name'] ?? 'ข้อมูลส่วนตัว';
+          _profileImageBase64 = doc.data()?['profile_image']; // ดึงรหัสรูปมาเก็บ
+        });
       }
-    } catch (_) {
-      try {
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get(const GetOptions(source: Source.server));
-        if (doc.exists && mounted) {
-          setState(() => _userName = doc.data()?['name'] ?? 'ข้อมูลส่วนตัว');
-        }
-      } catch (_) {}
-    }
+    });
   }
 
   @override
@@ -83,7 +79,6 @@ class _SidebarScreenState extends State<SidebarScreen> {
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       child: Row(
         children: [
-          // คลิกไอคอนคน → ไปหน้า profile
           GestureDetector(
             onTap: () {
               Navigator.pop(context);
@@ -102,8 +97,18 @@ class _SidebarScreenState extends State<SidebarScreen> {
                     offset: const Offset(0, 4),
                   ),
                 ],
+                // --- ส่วนที่เพิ่ม: เช็คและโชว์รูป Base64 ---
+                image: (_profileImageBase64 != null && _profileImageBase64!.length > 100)
+                    ? DecorationImage(
+                        image: MemoryImage(base64Decode(_profileImageBase64!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
-              child: const Icon(Icons.person, color: Colors.white, size: 26),
+              // ถ้าไม่มีรูปใน Base64 ให้โชว์ไอคอนคนเดิม
+              child: (_profileImageBase64 == null || _profileImageBase64!.length <= 100)
+                  ? const Icon(Icons.person, color: Colors.white, size: 26)
+                  : null,
             ),
           ),
           const SizedBox(width: 12),
@@ -118,7 +123,7 @@ class _SidebarScreenState extends State<SidebarScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          // กากบาท → ปิด sidebar เฉยๆ
+    
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
@@ -237,7 +242,7 @@ class _SidebarScreenState extends State<SidebarScreen> {
               ),
               const SizedBox(width: 14),
               Text(
-                'ออกจากระบบ',
+                'log out',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

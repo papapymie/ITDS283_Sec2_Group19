@@ -394,61 +394,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 68,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavItem(Icons.home_filled, 'HOME PAGE', 0,
-                onTap: () => setState(() => _bottomIndex = 0),
-              ),
-              _buildNavItem(Icons.campaign_outlined, 'ANNOUNCEMENT', 1,
-                onTap: () async {
-                  setState(() => _bottomIndex = 1);
-                  await Navigator.pushNamed(context, '/announcement');
-                  setState(() => _bottomIndex = 0);
-                },
-              ),
-              _buildNavItem(Icons.person_outline, 'ACCOUNT', 2,
-                onTap: () async {
-                  setState(() => _bottomIndex = 2);
-                  await Navigator.pushNamed(context, '/profile');
-                  setState(() {
-                    _bottomIndex = 0;
-                    _loadUserName();
-                  });
-                },
-              ),
-              _buildNavItem(Icons.add_home_outlined, 'ADD ELECTRICAL', 3,
-                onTap: () async {
-                  setState(() => _bottomIndex = 3);
-                  await Navigator.pushNamed(context, '/add_electrical_water');
-                  setState(() => _bottomIndex = 0);
-                },
-              ),
-            ],
-          ),
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 16,
+          offset: const Offset(0, -4),
+        ),
+      ],
+    ),
+    child: SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 68,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // ใส่ _bottomIndex ต่อท้ายเลข index ในทุกลำดับแบบนี้ครับ
+            _buildNavItem(Icons.home_filled, 'HOME PAGE', 0, _bottomIndex,
+              onTap: () => setState(() => _bottomIndex = 0),
+            ),
+            _buildNavItem(Icons.campaign_outlined, 'ANNOUNCEMENT', 1, _bottomIndex,
+              onTap: () async {
+                setState(() => _bottomIndex = 1);
+                await Navigator.pushNamed(context, '/announcement');
+                setState(() => _bottomIndex = 0);
+              },
+            ),
+            _buildNavItem(Icons.person_outline, 'ACCOUNT', 2, _bottomIndex,
+              onTap: () async {
+                setState(() => _bottomIndex = 2);
+                await Navigator.pushNamed(context, '/profile');
+                setState(() {
+                  _bottomIndex = 0;
+                  _loadUserName();
+                });
+              },
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildNavItem(IconData icon, String label, int index,
+ // เพิ่ม int currentIndex เข้าไปใน Parameter เพื่อรับค่าจากข้างนอก
+Widget _buildNavItem(IconData icon, String label, int index, int currentIndex,
       {VoidCallback? onTap}) {
-    final isActive = _bottomIndex == index;
+    
+    // เช็คจากค่าที่ส่งเข้ามาแทน
+    final isActive = currentIndex == index; 
+    
     return GestureDetector(
       onTap: onTap,
       child: Column(

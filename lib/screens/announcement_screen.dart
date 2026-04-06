@@ -44,6 +44,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                     return const Center(
                       child: Text('ยังไม่มีประกาศ',
                           style: TextStyle(color: Colors.grey)),
+                          
                     );
                   }
 

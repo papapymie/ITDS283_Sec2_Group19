@@ -36,44 +36,58 @@ class ElectricHomeApp extends StatelessWidget {
   const ElectricHomeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Electric Home',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'sans-serif',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4CAF87),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
+Widget build(BuildContext context) {
+  return MaterialApp(
+    title: 'Electric Home',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF4CAF87),
+        brightness: Brightness.light,
       ),
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const LoadingScreen();
-          }
-          if (snapshot.hasData) {
-            return const HomeScreen();
-          }
-          return const LoginScreen();
-        },
+      
+      // --- ส่วนการตั้งค่า Font และขนาด ---
+      fontFamily: 'Koulen',
+      textTheme: Theme.of(context).textTheme.apply(
+        fontFamily: 'Koulen',
+        fontFamilyFallback: ['NotoSansThai'],
+        // ปรับตัวเลขตรงนี้เพื่อเพิ่มขนาด (1.15 = ใหญ่ขึ้น 15%)
+        // ถ้ายังเล็กไป ลองขยับเป็น 1.2 หรือ 1.25 ดูครับ
+        fontSizeFactor: 1.3, 
+        // ช่วยให้ระยะบรรทัดไม่เบียดกันเกินไปเมื่อฟอนต์ใหญ่ขึ้น
+        displayColor: Colors.black87,
+        bodyColor: Colors.black87,
       ),
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/loading': (context) => const LoadingScreen(),
-        '/home': (context) => const HomeScreen(),
-        '/announcement': (context) => const AnnouncementScreen(),
-        '/review': (context) => const ReviewScreen(),
-        '/calculate': (context) => const CalculateScreen(),
-        '/profile': (context) => const ProfileScreen(),
-        '/location': (context) => const LocationScreen(),
-        '/add_electrical_water': (context) => const AddElectricalWaterScreen(),
-        '/add_device': (context) => const AddDeviceScreen(),
-        '/timer': (context) => const TimerScreen(),
-        '/tracking': (context) => const TrackingScreen(),
+      // ---------------------------------
+    ),
+    home: StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingScreen();
+        }
+        if (snapshot.hasData) {
+          return const HomeScreen();
+        }
+        return const LoginScreen();
       },
-    );
-  }
+    ),
+
+    routes: {
+      '/login': (context) => const LoginScreen(),
+      '/loading': (context) => const LoadingScreen(),
+      '/home': (context) => const HomeScreen(),
+      '/announcement': (context) => const AnnouncementScreen(),
+      '/review': (context) => const ReviewScreen(),
+      '/calculate': (context) => const CalculateScreen(),
+      '/profile': (context) => const ProfileScreen(),
+      '/location': (context) => const LocationScreen(),
+      '/add_electrical_water': (context) => const AddElectricalWaterScreen(),
+      '/add_device': (context) => const AddDeviceScreen(),
+      '/timer': (context) => const TimerScreen(),
+      '/tracking': (context) => const TrackingScreen(),
+    },
+  );
 }
+} 

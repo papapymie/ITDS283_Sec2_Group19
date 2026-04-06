@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../fonts/my_flutter_app_icons.dart';
 
@@ -20,10 +21,52 @@ class DeviceItem {
 }
 
 class DeviceProvider extends ChangeNotifier {
-  // Singleton
   static final DeviceProvider _instance = DeviceProvider._internal();
   factory DeviceProvider() => _instance;
   DeviceProvider._internal();
+
+  // Timer state
+  final Map<int, Duration> durations = {};
+  final Map<int, bool> isRunning = {};
+  final Map<int, Timer?> timers = {};
+
+  void initTimersIfNeeded(int length) {
+    for (int i = 0; i < length; i++) {
+      durations.putIfAbsent(i, () => Duration.zero);
+      isRunning.putIfAbsent(i, () => false);
+      timers.putIfAbsent(i, () => null);
+    }
+  }
+
+  void toggleTimer(int index, VoidCallback onExceed24h) {
+    if (isRunning[index] == true) {
+      timers[index]?.cancel();
+      isRunning[index] = false;
+      notifyListeners();
+    } else {
+      timers[index] = Timer.periodic(const Duration(seconds: 1), (_) {
+        final current = durations[index] ?? Duration.zero;
+        if (current.inDays >= 1) {
+          timers[index]?.cancel();
+          isRunning[index] = false;
+          notifyListeners();
+          onExceed24h();
+          return;
+        }
+        durations[index] = current + const Duration(seconds: 1);
+        notifyListeners();
+      });
+      isRunning[index] = true;
+      notifyListeners();
+    }
+  }
+
+  void resetTimer(int index) {
+    timers[index]?.cancel();
+    durations[index] = Duration.zero;
+    isRunning[index] = false;
+    notifyListeners();
+  }
 
   List<DeviceItem> electricalDevices = [
     const DeviceItem(

@@ -113,7 +113,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   Widget _buildHeaderBar() {
     return Container(
-      height: 38,
+      height: 50,
       width: double.infinity,
       color: const Color(0xFFCFEFC0),
       alignment: Alignment.centerLeft,
@@ -133,7 +133,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         },
         child: const Icon(
           Icons.arrow_circle_left_outlined,
-          size: 24,
+          size: 30,
           color: Colors.black,
         ),
       ),
@@ -468,12 +468,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
                               icon: const Icon(Icons.location_on_outlined),
                               label: const Text('ดูสถานที่รับชำระเงิน'),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 30),
                             Container(
                               width: double.infinity,
                               constraints: BoxConstraints(
-                                minHeight:
-                                    MediaQuery.of(context).size.height * 0.35,
+                                minHeight: MediaQuery.of(context).size.height - 250,
                               ),
                               decoration: const BoxDecoration(
                                 color: Color(0xFFF7F7F7),
@@ -495,8 +494,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                   history.isEmpty
                                       ? const Padding(
                                           padding: EdgeInsets.all(40),
-                                          child:
-                                              Text('ยังไม่มีประวัติการชำระเงิน'),
+                                          child: Text('ยังไม่มีประวัติการชำระเงิน'),
                                         )
                                       : ListView.builder(
                                           shrinkWrap: true,

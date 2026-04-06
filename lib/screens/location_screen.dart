@@ -4,7 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
@@ -173,7 +174,6 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
     }
   }
 
-  // ใช้ที่อยู่จาก Profile (SharedPreferences)
   Future<void> _useProfileAddress() async {
     setState(() {
       _isLoadingLocation = true;
@@ -181,27 +181,39 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
     });
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _showError('กรุณาเข้าสู่ระบบก่อน');
+        return;
+      }
 
-      // ดึงที่อยู่จาก SharedPreferences
-      final subdistrict = prefs.getString('subdistrict') ?? '';
-      final district = prefs.getString('district') ?? '';
-      final province = prefs.getString('province') ?? '';
-      final postcode = prefs.getString('postcode') ?? '';
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-      // ประกอบที่อยู่สำหรับ Geocoding
-      final addressQuery =
-          '$subdistrict $district $province $postcode Thailand'
-              .trim()
-              .replaceAll(RegExp(r'\s+'), ' ');
+      if (!doc.exists || doc.data() == null) {
+        _showError('ไม่พบข้อมูลใน Profile\nกรุณากรอกข้อมูลที่อยู่ในหน้า Profile ก่อน');
+        return;
+      }
+
+      final data = doc.data()!;
+      final subdistrict = data['subdistrict']?.toString() ?? '';
+      final district = data['district']?.toString() ?? '';
+      final province = data['province']?.toString() ?? '';
+      final postcode = data['postcode']?.toString() ?? '';
 
       if (subdistrict.isEmpty && district.isEmpty && province.isEmpty) {
-        _showError(
-            'ไม่พบที่อยู่ใน Profile\nกรุณาอัปเดตข้อมูลที่อยู่ในหน้า Profile ก่อน');
+        _showError('ไม่พบที่อยู่ใน Profile\nกรุณาอัปเดตข้อมูลที่อยู่ในหน้า Profile ก่อน');
         return;
       }
 
       setState(() => _locationStatusText = 'กำลังแปลงที่อยู่เป็นพิกัด...');
+
+      final addressQuery =
+          '$subdistrict $district $province $postcode Thailand'
+              .trim()
+              .replaceAll(RegExp(r'\s+'), ' ');
 
       final locations = await locationFromAddress(addressQuery);
 
@@ -215,8 +227,7 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
 
       setState(() {
         _locationMode = 'address';
-        _locationStatusText =
-            'เรียงตามที่อยู่: $district, $province';
+        _locationStatusText = 'เรียงตามที่อยู่: $district, $province';
       });
     } catch (e) {
       _showError('เกิดข้อผิดพลาด: $e');
@@ -341,7 +352,6 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
         child: Column(
           children: [
             _buildHeader(context),
-            // Status bar แสดงโหมดที่เลือก
             if (_locationStatusText.isNotEmpty)
               Container(
                 width: double.infinity,
@@ -423,62 +433,71 @@ class _PaymentLocationsPageState extends State<PaymentLocationsPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFFC8ECB9),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 50,
+          width: double.infinity,
+          color: const Color(0xFFCFEFC0),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              } else {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/home',
+                  (route) => false,
+                );
+              }
+            },
+            child: const Icon(
+              Icons.arrow_circle_left_outlined,
+              size: 30,
+              color: Colors.black,
+            ),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => Navigator.pop(context),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.arrow_circle_left_outlined,
-                      size: 34, color: Colors.black87),
-                ),
+        // ปุ่มเรียงตามระยะ
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton.icon(
+              onPressed: _showLocationModeDialog,
+              icon: const Icon(Icons.near_me, size: 16),
+              label: Text(
+                _locationMode == 'none' ? 'เรียงตามระยะ' : 'เปลี่ยนโหมด',
+                style: const TextStyle(fontSize: 13),
               ),
-              // ปุ่มเรียงตามระยะ
-              ElevatedButton.icon(
-                onPressed: _showLocationModeDialog,
-                icon: const Icon(Icons.near_me, size: 16),
-                label: Text(
-                  _locationMode == 'none' ? 'เรียงตามระยะ' : 'เปลี่ยนโหมด',
-                  style: const TextStyle(fontSize: 13),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF87),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF87),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Text('สถานที่รับชำระเงิน',
-                style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black)),
+        ),
+        // Title แยกออกมาอิสระ
+        const Padding(
+          padding: EdgeInsets.fromLTRB(18, 8, 18, 12),
+          child: Text(
+            'สถานที่รับชำระเงิน',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+              color: Colors.black,
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -602,61 +621,58 @@ class PaymentLocationMapPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFC8ECB9),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(28),
-                  bottomRight: Radius.circular(28),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(24),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 50,
+                  width: double.infinity,
+                  color: const Color(0xFFCFEFC0),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
                     onTap: () => Navigator.pop(context),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(Icons.arrow_circle_left_outlined,
-                          size: 34, color: Colors.black87),
+                    child: const Icon(
+                      Icons.arrow_circle_left_outlined,
+                      size: 30,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 10, 18, 4),
+                  child: Text(
+                    location.name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                if (location.distanceKm != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Text(
-                      location.name,
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black),
+                    padding: const EdgeInsets.only(left: 18, bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.directions_walk,
+                            size: 14, color: Color(0xFF2E7D32)),
+                        const SizedBox(width: 4),
+                        Text(
+                          location.distanceKm! < 1
+                              ? 'ห่าง ${(location.distanceKm! * 1000).toStringAsFixed(0)} ม.'
+                              : 'ห่าง ${location.distanceKm!.toStringAsFixed(1)} กม.',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2E7D32),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  if (location.distanceKm != null)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6, top: 4),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.directions_walk,
-                              size: 14, color: Color(0xFF2E7D32)),
-                          const SizedBox(width: 4),
-                          Text(
-                            location.distanceKm! < 1
-                                ? 'ห่าง ${(location.distanceKm! * 1000).toStringAsFixed(0)} ม.'
-                                : 'ห่าง ${location.distanceKm!.toStringAsFixed(1)} กม.',
-                            style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF2E7D32)),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
             Expanded(
               child: Padding(

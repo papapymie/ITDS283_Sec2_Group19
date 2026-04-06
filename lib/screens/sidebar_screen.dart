@@ -140,7 +140,8 @@ class _SidebarScreenState extends State<SidebarScreen> {
     final items = [
       {'icon': Icons.calculate_outlined, 'label': 'CALCULATE', 'route': '/calculate'},
       {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': '/location'},
-      {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': ''},
+      {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': '/tracking'},
+      {'icon': Icons.timer_outlined, 'label': 'TIMER', 'route': '/timer'},
     ];
     return Column(
       children: items.map((item) => _buildSidebarItem(

@@ -50,107 +50,127 @@ class _AddElectricalWaterScreenState extends State<AddElectricalWaterScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final electricalDevices = _provider.electricalDevices;
-  final waterDevices = _provider.waterDevices;
+  Widget build(BuildContext context) {
+    final electricalDevices = _provider.electricalDevices;
+    final waterDevices = _provider.waterDevices;
 
-  return Scaffold(
-    backgroundColor: const Color(0xFFF8F4C8),
-    // 1. ใช้ AppBar แทนการวาด Container เอง เพื่อให้มันจัดการ Safe Area และ "ลอย" ได้จริง
-    appBar: AppBar(
-      backgroundColor: const Color(0xFFCFEFC0),
-      elevation: 2, // เพิ่มเงาเพื่อให้ดู "ลอย" เหนือเนื้อหา
-      toolbarHeight: 50,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_circle_left_outlined, size: 32, color: Colors.black),
-        onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
-      ),
-      title: const Text(
-        'ELECTRICAL & WATER',
-        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.black),
-      ),
-      centerTitle: false,
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ส่วนคำอธิบาย (ย้ายลงมาใน body)
-          const Text(
-            'กดเลือกเครื่องใช้ไฟฟ้าและน้ำประปาเพื่อจับเวลาการใช้งาน',
-            style: TextStyle(
-                fontFamily: 'NotoSansThai',
-                fontSize: 16,
-                fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 24),
-
-          // ── Electrical Grid ──
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: electricalDevices.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 18,
-              mainAxisSpacing: 18,
-              childAspectRatio: 1.0, // ปรับเป็น 1.0 เพื่อให้เป็นสี่เหลี่ยมจัตุรัสสวยๆ
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F4C8),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 50,
+              width: double.infinity,
+              color: const Color(0xFFCFEFC0),
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => Navigator.pushNamedAndRemoveUntil(
+                    context, '/home', (route) => false),
+                child: const Icon(
+                  Icons.arrow_circle_left_outlined,
+                  size: 30,
+                  color: Colors.black,
+                ),
+              ),
             ),
-            itemBuilder: (context, index) {
-              final device = electricalDevices[index];
-              return _deviceCard(
-                title: device.name,
-                icon: device.icon,
-                cardColor: device.cardColor,
-                iconColor: device.iconColor,
-                onTap: () => _goToTimerPage(device),
-                onLongPress: () => setState(() => _provider.deleteDevice(device)),
-              );
-            },
-          ),
-
-          const SizedBox(height: 24),
-          const Divider(thickness: 2, color: Colors.black), // ใช้ Divider แทน Container เส้นดำ
-          const SizedBox(height: 24),
-
-          // ── Water Grid ──
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: waterDevices.length + 1,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 18,
-              mainAxisSpacing: 18,
-              childAspectRatio: 1.0,
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 12, 18, 4),
+              child: Text(
+                'ELECTRICAL & WATER',
+                style: TextStyle(
+                  fontFamily: 'Koulen',
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
-            itemBuilder: (context, index) {
-              if (index == waterDevices.length) {
-                return _deviceCard(
-                  title: 'เพิ่มเครื่องใช้อื่นๆ',
-                  icon: Icons.add_circle_outline,
-                  cardColor: const Color(0xFFD3DEE5),
-                  iconColor: const Color(0xFF222222),
-                  onTap: _openAddDevicePage,
-                );
-              }
-              final device = waterDevices[index];
-              return _deviceCard(
-                title: device.name,
-                icon: device.icon,
-                cardColor: device.cardColor,
-                iconColor: device.iconColor,
-                onTap: () => _goToTimerPage(device),
-                onLongPress: () => setState(() => _provider.deleteDevice(device)),
-              );
-            },
-          ),
-        ],
+            // เนื้อหา
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'กดเลือกเครื่องใช้ไฟฟ้าและน้ำประปาเพื่อจับเวลาการใช้งาน',
+                      style: TextStyle(
+                        fontFamily: 'NotoSansThai',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: electricalDevices.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 18,
+                        mainAxisSpacing: 18,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemBuilder: (context, index) {
+                        final device = electricalDevices[index];
+                        return _deviceCard(
+                          title: device.name,
+                          icon: device.icon,
+                          cardColor: device.cardColor,
+                          iconColor: device.iconColor,
+                          onTap: () => _goToTimerPage(device),
+                          onLongPress: () =>
+                              setState(() => _provider.deleteDevice(device)),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    const Divider(thickness: 2, color: Colors.black),
+                    const SizedBox(height: 24),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: waterDevices.length + 1,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 18,
+                        mainAxisSpacing: 18,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemBuilder: (context, index) {
+                        if (index == waterDevices.length) {
+                          return _deviceCard(
+                            title: 'เพิ่มเครื่องใช้อื่นๆ',
+                            icon: Icons.add_circle_outline,
+                            cardColor: const Color(0xFFD3DEE5),
+                            iconColor: const Color(0xFF222222),
+                            onTap: _openAddDevicePage,
+                          );
+                        }
+                        final device = waterDevices[index];
+                        return _deviceCard(
+                          title: device.name,
+                          icon: device.icon,
+                          cardColor: device.cardColor,
+                          iconColor: device.iconColor,
+                          onTap: () => _goToTimerPage(device),
+                          onLongPress: () =>
+                              setState(() => _provider.deleteDevice(device)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   static Widget _deviceCard({
     required String title,

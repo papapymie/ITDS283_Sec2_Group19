@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
+import 'timer_screen.dart';
 
 class SidebarScreen extends StatefulWidget {
   const SidebarScreen({super.key});
@@ -146,7 +147,6 @@ class _SidebarScreenState extends State<SidebarScreen> {
       {'icon': Icons.calculate_outlined, 'label': 'CALCULATE', 'route': '/calculate'},
       {'icon': Icons.location_on_outlined, 'label': 'PAYMENT LOCATION', 'route': '/payment_location'},
       {'icon': Icons.receipt_long_outlined, 'label': 'PAYMENT TRACKING', 'route': '/tracking'},
-      {'icon': Icons.timer_outlined, 'label': 'TIMER', 'route': '/timer'},
     ];
     return Column(
       children: items.map((item) => _buildSidebarItem(

@@ -453,7 +453,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
                               onPressed: () =>
-                                  Navigator.pushNamed(context, '/location'),
+                                  Navigator.pushNamed(context, '/payment_location'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF184A86),
                                 foregroundColor: Colors.white,

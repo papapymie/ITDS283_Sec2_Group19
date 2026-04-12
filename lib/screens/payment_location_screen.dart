@@ -53,11 +53,12 @@ class _PaymentLocationScreenState extends State<PaymentLocationScreen> {
   bool _isLoadingLocation = false;
   String _locationMode = 'none'; // none | gps | address
   String _locationStatusText = '';
+  bool _isUpdatingFavorite = false;
 
   @override
   void initState() {
     super.initState();
-    _loadLocations();
+    _loadLocations().then((_) => _loadFavorites());
   }
 
   Future<void> _loadLocations() async {
@@ -84,6 +85,25 @@ class _PaymentLocationScreenState extends State<PaymentLocationScreen> {
       setState(() => _isLoading = false);
       _showError('โหลดข้อมูลสถานที่ไม่สำเร็จ: $e');
     }
+  }
+
+  Future<void> _loadFavorites() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final snap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('favorite_locations')
+        .get();
+
+    final favoriteIds = snap.docs.map((d) => d.id).toSet();
+
+    setState(() {
+      for (final loc in _locations) {
+        loc.isFavorite = favoriteIds.contains(loc.id);
+      }
+    });
   }
 
   void _calculateDistances(double userLat, double userLng) {
@@ -311,10 +331,35 @@ class _PaymentLocationScreenState extends State<PaymentLocationScreen> {
     );
   }
 
-  void _toggleFavorite(PaymentLocation location) {
-    setState(() {
-      location.isFavorite = !location.isFavorite;
-    });
+  Future<void> _toggleFavorite(PaymentLocation location) async {
+    if (_isUpdatingFavorite) return;
+    _isUpdatingFavorite = true;
+
+    setState(() => location.isFavorite = !location.isFavorite);
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final favRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorite_locations')
+          .doc(location.id);
+
+      if (location.isFavorite) {
+        await favRef.set({'locationId': location.id});
+      } else {
+        await favRef.delete();
+      }
+    } catch (e) {
+      setState(() => location.isFavorite = !location.isFavorite);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่')),
+      );
+    } finally {
+      _isUpdatingFavorite = false;
+    }
   }
 
   void _openMapPage(PaymentLocation location) {

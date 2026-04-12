@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentHistory {
   final DateTime date;
@@ -13,29 +13,36 @@ class PaymentHistory {
     required this.monthKey,
   });
 
-  Map<String, dynamic> toJson() {
+  // แปลงจาก Firestore → PaymentHistory
+  factory PaymentHistory.fromFirestore(Map<String, dynamic> data) {
+    return PaymentHistory(
+      date: (data['date'] as Timestamp).toDate(),
+      amount: (data['amount'] as num).toDouble(),
+      monthKey: data['monthKey'] as String? ?? '',
+    );
+  }
+
+  // แปลงจาก PaymentHistory → Firestore
+  Map<String, dynamic> toFirestore() {
     return {
-      'date': date.toIso8601String(),
+      'date': Timestamp.fromDate(date), // ← Firebase ใช้ Timestamp ไม่ใช่ String
       'amount': amount,
       'monthKey': monthKey,
     };
   }
-
-  factory PaymentHistory.fromJson(Map<String, dynamic> json) {
-    return PaymentHistory(
-      date: DateTime.parse(json['date']),
-      amount: (json['amount'] as num).toDouble(),
-      monthKey: json['monthKey'] ?? '',
-    );
-  }
 }
 
 class PaymentProvider extends ChangeNotifier {
-  static const String storageKey = 'payment_history_all';
-
   final List<PaymentHistory> _paymentHistory = [];
 
   List<PaymentHistory> get paymentHistory => List.unmodifiable(_paymentHistory);
+
+  String? get _uid => FirebaseAuth.instance.currentUser?.uid;
+
+  CollectionReference get _paymentsRef => FirebaseFirestore.instance
+      .collection('users')
+      .doc(_uid)
+      .collection('payments'); // ← users/{uid}/payments/
 
   String currentMonthKey() {
     final now = DateTime.now();
@@ -57,53 +64,59 @@ class PaymentProvider extends ChangeNotifier {
   }
 
   Future<void> loadHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final historyJson = prefs.getString(storageKey);
+    if (_uid == null) return;
 
-    _paymentHistory.clear();
+    try {
+      final snap = await _paymentsRef
+          .orderBy('date', descending: true) 
+          .get();
 
-    if (historyJson != null && historyJson.isNotEmpty) {
-      try {
-        final List<dynamic> decoded = jsonDecode(historyJson);
-        _paymentHistory.addAll(
-          decoded.map(
-            (e) => PaymentHistory.fromJson(Map<String, dynamic>.from(e)),
-          ),
-        );
-      } catch (_) {}
+      _paymentHistory.clear();
+      _paymentHistory.addAll(
+        snap.docs.map((doc) =>
+            PaymentHistory.fromFirestore(doc.data() as Map<String, dynamic>)),
+      );
+
+      notifyListeners();
+    } catch (e) {
+      print('loadHistory error: $e');
     }
-
-    notifyListeners();
   }
 
-  Future<void> saveHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(
-      _paymentHistory.map((item) => item.toJson()).toList(),
-    );
-    await prefs.setString(storageKey, encoded);
-  }
-
+  // ── บันทึกการชำระเงินลง Firebase ──
   Future<bool> addPayment({
     required DateTime date,
     required double amount,
   }) async {
+    if (_uid == null) return false;
+
     final paymentMonth = monthKeyOf(date);
     final isLate = paymentMonth != currentMonthKey();
 
-    _paymentHistory.removeWhere((item) => item.monthKey == paymentMonth);
-    _paymentHistory.insert(
-      0,
-      PaymentHistory(
+    try {
+      final existing = await _paymentsRef
+          .where('monthKey', isEqualTo: paymentMonth)
+          .get();
+      for (final doc in existing.docs) {
+        await doc.reference.delete();
+      }
+
+      final newPayment = PaymentHistory(
         date: date,
         amount: amount,
         monthKey: paymentMonth,
-      ),
-    );
+      );
+      await _paymentsRef.add(newPayment.toFirestore());
 
-    await saveHistory();
-    notifyListeners();
+      // อัปเดต local list ด้วย
+      _paymentHistory.removeWhere((item) => item.monthKey == paymentMonth);
+      _paymentHistory.insert(0, newPayment);
 
-    return isLate;
+      notifyListeners();
+      return isLate;
+    } catch (e) {
+      print('addPayment error: $e');
+      return false;
+    }
   }
 }

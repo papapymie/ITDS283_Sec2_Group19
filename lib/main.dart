@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'providers/payment_provider.dart';
+import 'providers/device_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/announcement_screen.dart';
@@ -15,7 +16,6 @@ import 'screens/profile_screen.dart';
 import 'screens/payment_location_screen.dart';
 import 'screens/add_electrical_water_screen.dart';
 import 'screens/loading_screen.dart';
-import 'screens/timer_screen.dart';
 import 'screens/tracking_screen.dart';
 
 void main() async {
@@ -25,8 +25,11 @@ void main() async {
   );
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => PaymentProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PaymentProvider()),
+        ChangeNotifierProvider(create: (_) => TimerProvider()), 
+      ],
       child: const ElectricHomeApp(),
     ),
   );
@@ -54,7 +57,7 @@ Widget build(BuildContext context) {
         fontFamilyFallback: ['NotoSansThai'],
         // ปรับตัวเลขตรงนี้เพื่อเพิ่มขนาด (1.15 = ใหญ่ขึ้น 15%)
         // ถ้ายังเล็กไป ลองขยับเป็น 1.2 หรือ 1.25 ดูครับ
-        fontSizeFactor: 1.3, 
+        fontSizeFactor: 1.3,  
         // ช่วยให้ระยะบรรทัดไม่เบียดกันเกินไปเมื่อฟอนต์ใหญ่ขึ้น
         displayColor: Colors.black87,
         bodyColor: Colors.black87,
@@ -85,7 +88,6 @@ Widget build(BuildContext context) {
       '/payment_location': (context) => const PaymentLocationScreen(),
       '/add_electrical_water': (context) => const AddElectricalWaterScreen(),
       '/add_device': (context) => const AddDeviceScreen(),
-      '/timer': (context) => const TimerScreen(),
       '/tracking': (context) => const TrackingScreen(),
     },
   );

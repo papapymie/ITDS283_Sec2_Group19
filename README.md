@@ -28,67 +28,18 @@
 | Geolocator | ระบุตำแหน่ง GPS ของผู้ใช้ |
 | Geocoding | แปลงที่อยู่เป็นพิกัด |
 
----
-
 ## โครงสร้าง Firebase
+```
 Firestore
-├── users/
-│   └── {user_id}/
-│       ├── name
-│       ├── profile_image
-│       ├── address
-│       │
-│       ├── devices/                  # เครื่องใช้ไฟฟ้าและน้ำประปาของผู้ใช้
-│       │   └── {device_id}/
-│       │       ├── createdAt
-│       │       ├── name
-│       │       ├── type
-│       │       └── iconKey
-│       │
-│       ├── payments/                 # ประวัติการชำระเงิน
-│       │   └── {payment_id}/
-│       │       ├── date
-│       │       ├── amount
-│       │       └── monthKey
-│       │
-│       └── favorite_locations/       # สถานที่ชำระเงินที่ชื่นชอบ
-│           └── {location_id}/
-│               └── locationId
-│
-├── announcements/                   # ประกาศ
-│   └── {announcement_id}/
-│       ├── created_at
-│       ├── date
-│       ├── isPinned
-│       └── title
-│
-├── electricity_usage/              # ข้อมูลการใช้ไฟฟ้า/น้ำประปา
-│   └── {usage_id}/
-│       ├── user_id
-│       ├── location
-│       ├── recorded_at
-│       ├── electricity_units
-│       ├── electricity_cost
-│       ├── water_units
-│       ├── water_cost
-│       └── total
-│
-├── payment_location/               # สถานที่รับชำระเงินทั้งหมด
-│   └── {location_id}/
-│       ├── name
-│       ├── address
-│       ├── latitude
-│       └── longitude
-│
-└── reviews/                        # รีวิวจากผู้ใช้
-    └── {review_id}/
-        ├── user_id
-        ├── name
-        ├── photo_data
-        ├── stars
-        ├── text
-        └── created_at
----
+├── users/{user_id}
+│   ├── devices/
+│   ├── payments/
+│   └── favorite_locations/
+├── announcements/
+├── electricity_usage/
+├── payment_location/
+└── reviews/
+```
 
 ## วิธีติดตั้งและรันโปรเจกต์
 
@@ -118,9 +69,8 @@ adb connect <IP มือถือ>:5555
 flutter run
 ```
 
----
-
 ## โครงสร้าง Project
+```
 lib/
 ├── main.dart
 ├── firebase_options.dart
@@ -129,23 +79,21 @@ lib/
 ├── providers/
 │   ├── device_provider.dart         ← DeviceType, TimerProvider
 │   └── payment_provider.dart        ← ประวัติการชำระเงิน
-├── screens/
-│   ├── home_screen.dart
-│   └── login_screen.dart
-│   └── loading_screen.dart
-│   └── add_electrical_water_screen.dart
-│   └── add_device_screen.dart
-│   └── timer_screen.dart
-│   └── tracking_screen.dart
-│   └── payment_location_screen.dart
-│   └── location_map_screen.dart
-│   └── calculate_screen.dart
-│   └── announcement_screen.dart
-│   └── review_screen.dart
-│   └── profile_screen.dart
----
-
----
+└── screens/
+   ├── home_screen.dart
+   └── login_screen.dart
+   └── loading_screen.dart
+   └── add_electrical_water_screen.dart
+   └── add_device_screen.dart
+   └── timer_screen.dart
+   └── tracking_screen.dart
+   └── payment_location_screen.dart
+   └── location_map_screen.dart
+   └── calculate_screen.dart
+   └── announcement_screen.dart
+   └── review_screen.dart
+   └── profile_screen.dart
+```
 
 ## ระบบบัญชีผู้ใช้
 

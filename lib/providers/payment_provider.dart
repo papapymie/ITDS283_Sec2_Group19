@@ -42,7 +42,7 @@ class PaymentProvider extends ChangeNotifier {
   CollectionReference get _paymentsRef => FirebaseFirestore.instance
       .collection('users')
       .doc(_uid)
-      .collection('payments'); // ← users/{uid}/payments/
+      .collection('payments');
 
   String currentMonthKey() {
     final now = DateTime.now();
@@ -108,7 +108,7 @@ class PaymentProvider extends ChangeNotifier {
       );
       await _paymentsRef.add(newPayment.toFirestore());
 
-      // อัปเดต local list ด้วย
+      // อัปเดต local list 
       _paymentHistory.removeWhere((item) => item.monthKey == paymentMonth);
       _paymentHistory.insert(0, newPayment);
 

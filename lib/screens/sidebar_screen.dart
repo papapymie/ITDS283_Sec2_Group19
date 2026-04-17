@@ -25,7 +25,6 @@ class _SidebarScreenState extends State<SidebarScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // เปลี่ยนจาก .get() เป็น .snapshots().listen() เพื่อให้รูปอัปเดตทันที (Real-time)
     FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -98,7 +97,7 @@ class _SidebarScreenState extends State<SidebarScreen> {
                     offset: const Offset(0, 4),
                   ),
                 ],
-                // --- ส่วนที่เพิ่ม: เช็คและโชว์รูป Base64 ---
+                // --- เช็คและโชว์รูป Base64 ---
                 image: (_profileImageBase64 != null && _profileImageBase64!.length > 100)
                     ? DecorationImage(
                         image: MemoryImage(base64Decode(_profileImageBase64!)),

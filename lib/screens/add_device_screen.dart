@@ -29,8 +29,9 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _nameController.text.trim();
+
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('กรุณากรอกชื่อเครื่องใช้')),
@@ -61,9 +62,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(30),
-          border: isSelected
-              ? Border.all(color: Colors.black, width: 2.5)
-              : null,
+          border:
+              isSelected ? Border.all(color: Colors.black, width: 2.5) : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,8 +145,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                             child: _typeButton(
                               title: 'เครื่องใช้ไฟฟ้า',
                               icon: MyFlutterApp.electrical,
-                              isSelected:
-                                  selectedType == DeviceType.electrical,
+                              isSelected: selectedType == DeviceType.electrical,
                               bgColor: const Color(0xFFF4D487),
                               iconColor: const Color(0xFF7B411F),
                               onTap: () {

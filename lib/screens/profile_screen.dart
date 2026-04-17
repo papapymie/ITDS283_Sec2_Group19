@@ -46,10 +46,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     .listen((snapshot) {
   if (snapshot.exists && mounted) {
     setState(() {
-      // ดึงข้อมูลออกมาเป็น Map ตรงๆ ไม่ต้องสั่ง .toString() ทั้งยิบย่อยแบบเดิม
+      // ดึงข้อมูลออกมาเป็น Map 
       final data = snapshot.data() as Map<String, dynamic>;
       
-      // แปลงข้อมูลให้เป็น Map<String, String> อย่างปลอดภัย
+      // แปลงข้อมูลให้เป็น Map<String, String> 
       profileData = data.map((k, v) => MapEntry(k, v?.toString() ?? ''));
       
       _loading = false;
@@ -228,7 +228,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               builder: (_) => EditProfileScreen(profileData: profileData),
                             ),
                           );
-                          // ไม่ต้องดักรอค่า return เพราะ snapshots() จะอัปเดต UI ให้อัตโนมัติครับ
                         },
                         child: Container(
                           width: 56,

@@ -61,8 +61,6 @@ class LocationMapScreen extends StatelessWidget {
                   child: Text(
                     location.name,
                     style: const TextStyle(
-                      fontFamily: 'Koulen',
-                      fontSize: 26,
                       fontWeight: FontWeight.w900,
                       color: Colors.black,
                     ),

@@ -396,7 +396,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final currentPayment = provider.currentMonthPayment;
 
     if (currentPayment != null) {
-      return _buildPaidCard(); // ✅ ถ้ามีข้อมูลเดือนนี้ ให้ขึ้นรูปหมูเลย
+      return _buildPaidCard(); 
     }
 
     if (_status == 'confirming') {
@@ -407,7 +407,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       return _buildLateCard();
     }
 
-    return _buildUnpaidCard(); // ✅ ถ้ายังไม่มีข้อมูลเดือนนี้ ค่อยเป็นถุงเงิน
+    return _buildUnpaidCard(); 
   }
 
   @override

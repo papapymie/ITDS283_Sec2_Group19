@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:io'; // สำหรับ File
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:image_picker/image_picker.dart'; // อย่าลืม import ตัวนี้
-import 'package:firebase_storage/firebase_storage.dart'; // สำหรับอัปโหลดรูปขึ้น Firebase Storage
+import 'package:image_picker/image_picker.dart'; 
+import 'package:firebase_storage/firebase_storage.dart'; 
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, String> profileData;
@@ -15,7 +15,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final _formKey = GlobalKey<FormState>(); // ใช้สำหรับ Validate ข้อมูล
+  final _formKey = GlobalKey<FormState>(); 
   late Map<String, TextEditingController> _controllers;
   
   File? _imageFile; // เก็บรูปที่เลือก
@@ -79,7 +79,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
 
-// 2. ในฟังก์ชัน _save() แก้ไขตามนี้ครับ
 Future<void> _save() async {
   if (!_formKey.currentState!.validate()) return;
 
@@ -99,7 +98,7 @@ Future<void> _save() async {
 
     final updated = _controllers.map((k, c) => MapEntry(k, c.text.trim()));
     
-    // ถ้ามีรูปใหม่ให้ใส่เข้าไป ถ้าไม่มีให้ใช้รูปเดิม (ถ้ามี)
+    // ถ้ามีรูปใหม่ให้ใส่เข้าไป ถ้าไม่มีให้ใช้รูปเดิม 
     if (base64Image != null) {
       updated['profile_image'] = base64Image;
     } else {
@@ -132,7 +131,7 @@ Future<void> _save() async {
           ),
         ),
         child: SafeArea(
-          child: Form( // ใช้ Form ครอบเพื่อให้ตรวจสอบ Required ได้
+          child: Form( 
             key: _formKey,
             child: Column(
               children: [
@@ -162,7 +161,7 @@ Future<void> _save() async {
                         const Text('PROFILE', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 2)),
                         const SizedBox(height: 16),
 
-                        // Avatar Section - กดเพื่อเปลี่ยนรูปได้จริง
+                        // Avatar Section - กดเพื่อเปลี่ยนรูป
                         Center(
                           child: GestureDetector(
                             onTap: _pickImage,

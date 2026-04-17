@@ -201,7 +201,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
     );
   }
 
-  // --- จุดสำคัญ: ฟังก์ชันสร้างการ์ดรีวิวที่ดึงรูปมาแสดง ---
+  // --- ฟังก์ชันสร้างการ์ดรีวิวที่ดึงรูปมาแสดง ---
   Widget _buildReviewCard(Map<String, dynamic> review) {
     final String? photoData = review['photo_data']; // ดึง Base64 จาก Database ของรีวิวนั้นๆ
 

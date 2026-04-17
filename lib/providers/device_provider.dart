@@ -66,12 +66,12 @@ class TimerProvider extends ChangeNotifier {
       final current = durations[deviceId] ?? Duration.zero;
       final updated = current + const Duration(seconds: 1);
 
-      if (updated.inDays >= 1) {
+      if (updated.inDays   >= 1) {
         timer.cancel();
         durations[deviceId] = updated;
         isRunning[deviceId] = false;
         notifyListeners();
-        onExceed24h?.call(); // ← แจ้ง UI
+        onExceed24h?.call(); 
         return;
       }
 

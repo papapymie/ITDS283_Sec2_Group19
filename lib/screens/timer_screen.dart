@@ -357,11 +357,11 @@ class _TimerScreenState extends State<TimerScreen> {
                 final isWater = ['faucet', 'bathtub', 'washing_machine', 'water']
                     .contains(ap.iconKey);
                 final cardColor = isWater
-                    ? const Color(0xFFB8E3F7)  // ← สีฟ้า น้ำ
-                    : const Color(0xFFF4D487); // ← สีเหลือง ไฟฟ้า
+                    ? const Color(0xFFB8E3F7) 
+                    : const Color(0xFFF4D487); 
                 final iconColor = isWater
-                    ? const Color(0xFF234F88)  // ← น้ำเงิน น้ำ
-                    : const Color(0xFF7B411F); // ← น้ำตาล ไฟฟ้า
+                    ? const Color(0xFF234F88)  
+                    : const Color(0xFF7B411F);
 
                 return GestureDetector(
                   onTap: () => setState(() => _currentIndex = index),

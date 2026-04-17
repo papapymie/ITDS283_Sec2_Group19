@@ -70,14 +70,12 @@ class _CalculateScreenState extends State<CalculateScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        // --- 🔍 จุดที่แก้ไข: ดึงบิลล่าสุดแบบชัวร์ๆ ---
         final snapshot = await FirebaseFirestore.instance
             .collection('electricity_usage')
             .where('user_id', isEqualTo: user.uid)
-            .get(); // ดึงมาก่อนแล้วค่อยเรียงในโค้ดเพื่อเลี่ยงปัญหา Index
+            .get(); 
 
         if (snapshot.docs.isNotEmpty) {
-          // เรียงลำดับตาม recorded_at จากใหม่ไปเก่าในฝั่ง App
           final docs = snapshot.docs;
           docs.sort((a, b) {
             Timestamp t1 = a['recorded_at'] ?? Timestamp.now();
@@ -208,7 +206,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
                 if (_totalBill != null) ...[
                   const SizedBox(height: 24),
                   
-                  // --- ส่วนเปรียบเทียบ (Message Card) ---
+                  // --- Message Card ---
                   if (_comparisonMessage.isNotEmpty)
                     Container(
                       width: double.infinity,
@@ -289,7 +287,7 @@ class _CalculateScreenState extends State<CalculateScreen> {
     ); 
   }
 
-  // --- Widgets ย่อยเหมือนเดิม ---
+  // --- Widgets ---
   Widget _buildInputCard({required TextEditingController controller, required IconData icon, required Color iconColor, required String label, required String hint, required String rate, required Color cardColor}) {
     return Container(
       padding: const EdgeInsets.all(16),

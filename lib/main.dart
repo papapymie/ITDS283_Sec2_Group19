@@ -55,10 +55,7 @@ Widget build(BuildContext context) {
       textTheme: Theme.of(context).textTheme.apply(
         fontFamily: 'Koulen',
         fontFamilyFallback: ['NotoSansThai'],
-        // ปรับตัวเลขตรงนี้เพื่อเพิ่มขนาด (1.15 = ใหญ่ขึ้น 15%)
-        // ถ้ายังเล็กไป ลองขยับเป็น 1.2 หรือ 1.25 ดูครับ
         fontSizeFactor: 1.3,  
-        // ช่วยให้ระยะบรรทัดไม่เบียดกันเกินไปเมื่อฟอนต์ใหญ่ขึ้น
         displayColor: Colors.black87,
         bodyColor: Colors.black87,
       ),
